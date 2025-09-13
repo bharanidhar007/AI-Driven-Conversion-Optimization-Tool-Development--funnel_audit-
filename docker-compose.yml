@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: funnel
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+  redis:
+    image: redis:7
+  web:
+    build: ./backend
+    command: sh -c "python manage.py migrate --noinput && gunicorn funnel_audit.wsgi:application -b 0.0.0.0:8000"
+    volumes:
+      - ./backend:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+  worker:
+    build: ./backend
+    command: celery -A funnel_audit worker --loglevel=info
+    volumes:
+      - ./backend:/code
+    depends_on:
+      - db
+      - redis
+  frontend:
+    build: ./frontend
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - web
+volumes:
+  dbdata:

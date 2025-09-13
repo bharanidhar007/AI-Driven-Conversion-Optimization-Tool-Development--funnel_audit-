@@ -1,0 +1,11 @@
+Django>=4.2
+djangorestframework
+djangorestframework-simplejwt
+psycopg2-binary
+celery[redis]
+playwright
+beautifulsoup4
+openai
+stripe
+python-dotenv
+pillow
